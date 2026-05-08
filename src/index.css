@@ -1,47 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #07080f;
-  --color-bg-alt: #0c0e1b;
-  --color-brand: #f5a623;
-  --color-brand-light: #ffc355;
-  --color-accent: #6e88ff;
-  --color-success: #2dd4bf;
-  --color-warning: #fbbf24;
-  --color-danger: #ff6b73;
-  --color-border: rgba(150, 170, 255, 0.065);
+  --color-bg: #030303;
+  --color-bg-alt: #0C0C0C;
+  --color-brand: #FF6363;
+  --color-brand-light: #FF8585;
+  --color-accent: #5B8FF9;
+  --color-success: #00d97e;
+  --color-warning: #FFB347;
+  --color-danger: #FF5F57;
+  --color-border: rgba(255, 255, 255, 0.08); /* Linear style border */
+  --color-border-hover: rgba(255, 255, 255, 0.15);
+  --color-text: #EDEDED; /* Raycast Primary */
+  --color-text-dim: #999999;
+  --color-text-muted: #666666; /* Raycast Secondary */
   
-  --font-display: 'Syne', sans-serif;
-  --font-sans: 'DM Sans', sans-serif;
-  --font-mono: 'Fira Code', monospace;
+  --font-display: 'Inter', -apple-system, sans-serif;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'ui-monospace', 'SF Mono', monospace;
 }
 
 @layer base {
   body {
-    @apply bg-bg text-[#e8ebf6] font-sans selection:bg-brand/30;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-    background-size: 24px 24px;
+    @apply bg-bg text-text font-sans antialiased selection:bg-brand/30;
+    letter-spacing: -0.02em; /* Linear typography feel */
   }
 
   h1, h2, h3, h4 {
-    @apply font-display font-bold;
+    @apply font-sans font-medium tracking-tight;
   }
 }
 
-/* Custom Grain Effect */
-.grain::after {
-  content: "";
-  @apply fixed inset-0 pointer-events-none z-50 opacity-[0.025];
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+/* Glass Border Utility (Linear style with Inner Glow) */
+.glass-border {
+  position: relative;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05); /* The Linear "Inner Glow" */
 }
 
-/* Custom Scrollbar */
+.glass-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  /* Top-down light gradient border */
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 40%, rgba(255,255,255,0.01));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Pulse Animation */
+@keyframes ohmpulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.animate-pulse-dot {
+  animation: ohmpulse 2s infinite;
+}
+
+/* Custom Scrollbar (Raycast/Linear style) */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 10px;
 }
+
 ::-webkit-scrollbar-track {
-  @apply bg-bg;
+  background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  @apply bg-white/10 rounded-full hover:bg-white/20;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+  background-clip: content-box;
+}
+
+/* Raycast Mesh Background - Intensified for New Design */
+.mesh-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(255, 99, 99, 0.15) 0%, transparent 60%),
+    radial-gradient(circle at 100% 0%, rgba(255, 99, 99, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 0% 100%, rgba(91, 143, 249, 0.05) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
