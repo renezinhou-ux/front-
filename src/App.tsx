@@ -159,12 +159,7 @@ export default function App() {
         {/* Top Bar / Search */}
         <header className={`h-11 flex items-center justify-between px-4 shrink-0 transition-shadow ${activePage === 'orquestrador' ? 'bg-black' : 'bg-bg/80 backdrop-blur-xl border-b border-white/[0.06]'}`}>
           <div className="flex items-center gap-2">
-            <div className="flex gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-            </div>
-            <span className="font-mono text-[10px] text-[#555] ml-3.5">ohm.app/{activePage}</span>
+            <span className="font-mono text-[10px] text-[#555]">ohm.app/{activePage}</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -206,12 +201,11 @@ export default function App() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.08] text-[#ccc] text-[11px] px-2.5 py-1.5 rounded-md hover:bg-white/[0.08] transition-all">
-                    <Download size={11} /> Exportar
-                  </button>
-                  <button className="flex items-center gap-1.5 bg-linear-to-b from-brand to-[#d94e4e] shadow-[0_0_0_1px_rgba(255,99,99,0.3),0_8px_24px_-8px_rgba(255,99,99,0.4)] text-white text-[11px] font-medium px-3 py-1.5 rounded-md hover:brightness-110 transition-all glass-border">
-                    <Plus size={11} strokeWidth={3} /> Nova campanha
-                  </button>
+                  {activePage === 'fontes' && (
+                    <button className="flex items-center gap-1.5 bg-linear-to-b from-brand to-[#d94e4e] shadow-[0_0_0_1px_rgba(255,99,99,0.3),0_8px_24px_-8px_rgba(255,99,99,0.4)] text-white text-[11px] font-medium px-3 py-1.5 rounded-md hover:brightness-110 transition-all glass-border">
+                      <Plus size={11} strokeWidth={3} /> Subir leads pro banco
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -802,15 +796,199 @@ function CampaignsPage() {
 }
 
 function OrquestradorPage() {
-  const [view, setView] = useState<'selection' | 'running'>('selection');
+  const [view, setView] = useState<'selection' | 'running' | 'processing'>('selection');
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [detectedLeads, setDetectedLeads] = useState<any[]>([]);
+  const [progress, setProgress] = useState(0);
+
+  // Simulação de IA processando leads
+  useEffect(() => {
+    if (view === 'processing') {
+      const interval = setInterval(() => {
+        if (detectedLeads.length < 8) {
+          const names = ['Clínica Sorriso', 'Barber Shop Lux', 'Studio VIP', 'Academia Power', 'Estética Zen', 'Pet Shop Amigo', 'Restaurante Sabor', 'Spa Day'];
+          const newLead = {
+            id: Date.now(),
+            name: names[Math.floor(Math.random() * names.length)],
+            score: (Math.random() * 2 + 8).toFixed(1),
+            status: 'Analisado',
+            time: 'Agora'
+          };
+          setDetectedLeads(prev => [newLead, ...prev]);
+        }
+        setProgress(prev => (prev < 100 ? prev + 2 : 100));
+      }, 2500);
+      return () => clearInterval(interval);
+    }
+  }, [view, detectedLeads]);
 
   if (view === 'running') {
+    // Tela de transição rápida "Start"
+    setTimeout(() => setView('processing'), 2000);
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="w-24 h-24 rounded-full border-t-2 border-brand animate-spin" />
-        <h2 className="text-xl font-bold text-white mt-8 tracking-tight">Orquestrador Ativo</h2>
-        <p className="text-text-muted mt-2">Processando leads e automatizando interações...</p>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] bg-black">
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="relative"
+        >
+          <div className="w-32 h-32 rounded-full border-2 border-brand/20 border-t-brand animate-spin" />
+          <Zap className="absolute inset-0 m-auto text-brand animate-pulse" size={40} fill="currentColor" />
+        </motion.div>
+        <h2 className="text-xl font-bold text-white mt-8 tracking-[0.2em] uppercase">Sincronizando Motores</h2>
+        <p className="text-text-muted mt-2 font-mono text-xs">Acessando API Gemini 1.5 Pro...</p>
+      </div>
+    );
+  }
+
+  if (view === 'processing') {
+    return (
+      <div className="p-8 h-full flex flex-col bg-black overflow-hidden relative">
+        {/* Header de Processamento */}
+        <div className="flex items-center justify-between mb-8 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Orquestrador Ativo</h2>
+              <div className="px-2 py-0.5 bg-brand/10 border border-brand/20 rounded text-[9px] font-bold text-brand animate-pulse">LIVE</div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(0,217,126,0.5)]" />
+                <span className="font-mono text-[10px] text-success uppercase font-bold tracking-widest">IA Qualificando</span>
+              </div>
+              <span className="text-white/10 text-xs">|</span>
+              <span className="font-mono text-[10px] text-text-muted uppercase">Campanha: Automação WhatsApp IA</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="text-white font-bold text-lg leading-none">{progress}%</div>
+              <div className="text-[9px] text-[#444] font-mono uppercase">Varredura</div>
+            </div>
+            <button 
+              onClick={() => {
+                setView('selection');
+                setDetectedLeads([]);
+                setProgress(0);
+              }}
+              className="px-6 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold text-white uppercase tracking-widest hover:bg-danger/20 hover:border-danger/40 transition-all"
+            >
+              Parar Motor
+            </button>
+          </div>
+        </div>
+
+        {/* Progress Bar Superior */}
+        <div className="w-full h-1 bg-white/5 rounded-full mb-8 overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            className="h-full bg-brand shadow-[0_0_15px_rgba(255,99,99,0.5)]"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8 flex-1 min-h-0">
+          {/* Fila de Leads Detectados */}
+          <div className="glass-border bg-white/[0.02] rounded-2xl border border-white/5 flex flex-col min-h-0">
+            <div className="p-4 border-b border-white/5 flex items-center justify-between">
+              <h3 className="font-mono text-[10px] font-bold text-[#666] uppercase tracking-[0.2em]">Fluxo de Captura em Tempo Real</h3>
+              <span className="text-[10px] text-brand font-bold">{detectedLeads.length} leads encontrados</span>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
+              <AnimatePresence>
+                {detectedLeads.map((lead, idx) => (
+                  <motion.div
+                    key={lead.id}
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    className="glass-border bg-white/[0.03] border border-white/5 rounded-xl p-4 flex items-center justify-between group hover:bg-white/[0.05] transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-linear-to-br from-brand/20 to-brand/5 border border-brand/20 flex items-center justify-center text-brand font-bold text-xs">
+                        {lead.name.charAt(0)}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white">{lead.name}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="font-mono text-[9px] text-text-muted">SCORE IA:</span>
+                          <span className="font-mono text-[10px] text-success font-black">{lead.score}</span>
+                          <span className="text-[9px] text-[#333]">•</span>
+                          <span className="text-[9px] text-[#555]">{lead.time}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="px-2 py-1 bg-success/10 border border-success/20 rounded text-[9px] font-bold text-success uppercase">Aprovado</div>
+                      <button className="flex items-center gap-2 bg-brand text-white text-[10px] font-black px-4 py-2 rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-lg">
+                        <Download size={12} /> EXPORTAR PRO BANCO
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {detectedLeads.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center opacity-20">
+                  <div className="w-12 h-12 rounded-full border border-dashed border-white/20 animate-spin" />
+                  <p className="mt-4 font-mono text-[10px] uppercase tracking-widest">Iniciando Varredura Neural...</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Lateral - Status do Sistema */}
+          <div className="space-y-6">
+            <div className="glass-border bg-[#0C0C0C]/50 rounded-2xl p-6 border border-white/5">
+              <h3 className="font-mono text-[10px] font-bold text-[#666] uppercase tracking-[0.2em] mb-6">Logs do Orquestrador</h3>
+              <div className="space-y-4 font-mono text-[10px]">
+                <div className="flex gap-3">
+                  <span className="text-success font-bold">[OK]</span>
+                  <span className="text-text-muted">Conexão Google Maps API estabelecida</span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="text-success font-bold">[OK]</span>
+                  <span className="text-text-muted">Auth Token Gemini 1.5 verificado</span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="text-brand font-bold">[IA]</span>
+                  <span className="text-white/60">Analisando "Studio VIP"... Score: 9.2</span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="text-brand font-bold">[IA]</span>
+                  <span className="text-white/60">Cruzando dados redes sociais... OK</span>
+                </div>
+                <motion.div 
+                  animate={{ opacity: [0.3, 1, 0.3] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="flex gap-3"
+                >
+                  <span className="text-brand font-bold">[..]</span>
+                  <span className="text-white/20">Aguardando próximo bloco de dados...</span>
+                </motion.div>
+              </div>
+            </div>
+
+            <div className="glass-border bg-white/[0.02] rounded-2xl p-6 border border-white/5">
+              <div className="text-[10px] font-bold text-[#444] uppercase tracking-widest mb-4">Ações em Massa</div>
+              <button className="w-full py-4 bg-white/5 border border-white/10 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-brand hover:border-brand hover:text-white transition-all flex items-center justify-center gap-2 group">
+                <Download size={14} className="group-hover:-translate-y-0.5 transition-transform" />
+                Exportar Todos Selecionados
+              </button>
+              <p className="text-[9px] text-[#444] mt-4 text-center italic">
+                *Leads exportados serão movidos automaticamente para a aba "Leads".
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Efeito Visual de Fundo para o Orquestrador */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none opacity-20">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-brand blur-[150px] rounded-full opacity-20" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent blur-[150px] rounded-full opacity-10" />
+        </div>
       </div>
     );
   }
@@ -909,16 +1087,44 @@ function LeadsPage() {
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-white/[0.04]">
-            <th className="font-mono text-[9px] font-bold text-[#666] uppercase tracking-[0.1em] px-4 py-2">Lead</th>
-            <th className="font-mono text-[9px] font-bold text-[#666] uppercase tracking-[0.1em] px-4 py-2">Qualificação</th>
-            <th className="font-mono text-[9px] font-bold text-[#666] uppercase tracking-[0.1em] px-4 py-2">Canal</th>
-            <th className="font-mono text-[9px] font-bold text-[#666] uppercase tracking-[0.1em] px-3 py-2 text-right">Ação</th>
+            <th className="font-mono text-[9px] font-bold text-[#666] uppercase tracking-[0.1em] px-4 py-3">Lead</th>
+            <th className="font-mono text-[9px] font-bold text-[#666] uppercase tracking-[0.1em] px-4 py-3">Qualificação</th>
+            <th className="font-mono text-[9px] font-bold text-[#666] uppercase tracking-[0.1em] px-4 py-3">Canal</th>
+            <th className="font-mono text-[9px] font-bold text-[#666] uppercase tracking-[0.1em] px-4 py-3">Tags de Campanha</th>
+            <th className="font-mono text-[9px] font-bold text-[#666] uppercase tracking-[0.1em] px-4 py-3">Campanhas</th>
           </tr>
         </thead>
         <tbody className="text-[11.5px]">
-          <LeadTableRow name="Studio Nails" locale="Pinheiros, SP" score={92} temp="HOT" source="Maps" srcColor="text-blue-400" />
-          <LeadTableRow name="Barber Pro" locale="Moema, SP" score={45} temp="WARM" source="Instagram" srcColor="text-pink-400" />
-          <LeadTableRow name="Estética Advanced" locale="Centro, SP" score={78} temp="HOT" source="WhatsApp" srcColor="text-emerald-400" />
+          <LeadTableRow 
+            name="Studio Nails" 
+            locale="Pinheiros, SP" 
+            score={92} 
+            temp="HOT" 
+            source="Maps" 
+            srcColor="text-blue-400" 
+            tags={['Aberto Agora', 'Premium']}
+            campaigns={['Inauguração Moema', 'Upsell VIP']}
+          />
+          <LeadTableRow 
+            name="Barber Pro" 
+            locale="Moema, SP" 
+            score={45} 
+            temp="WARM" 
+            source="Instagram" 
+            srcColor="text-pink-400" 
+            tags={['Engajado', 'Link na Bio']}
+            campaigns={['Recuperação de Natal']}
+          />
+          <LeadTableRow 
+            name="Estética Advanced" 
+            locale="Centro, SP" 
+            score={78} 
+            temp="HOT" 
+            source="WhatsApp" 
+            srcColor="text-emerald-400" 
+            tags={['Respondeu IA', 'Interesse Alto']}
+            campaigns={['Automação MEI', 'Lançamento Black']}
+          />
         </tbody>
       </table>
     </div>
@@ -1034,9 +1240,18 @@ function TempStat({ label, count, labelColor, bg, border }: { label: string, cou
   );
 }
 
-function LeadTableRow({ name, locale, score, temp, source, srcColor }: { name: string, locale: string, score: number, temp: string, source: string, srcColor: string }) {
+function LeadTableRow({ name, locale, score, temp, source, srcColor, tags, campaigns }: { 
+  name: string, 
+  locale: string, 
+  score: number, 
+  temp: string, 
+  source: string, 
+  srcColor: string,
+  tags: string[],
+  campaigns: string[]
+}) {
   return (
-    <tr className="border-b border-white/[0.03] hover:bg-white/[0.015] transition-colors cursor-pointer group">
+    <tr className="border-b border-white/[0.03] hover:bg-white/[0.015] transition-colors cursor-default group">
       <td className="px-4 py-3">
         <div className="font-medium text-white">{name}</div>
         <div className="text-[10px] text-white/20 font-mono italic">{locale}</div>
@@ -1052,10 +1267,23 @@ function LeadTableRow({ name, locale, score, temp, source, srcColor }: { name: s
       <td className="px-4 py-3">
          <span className={`font-mono text-[10px] ${srcColor}`}>{source}</span>
       </td>
-      <td className="px-4 py-3 text-right">
-        <button className="p-1.5 text-white/10 hover:text-white transition-colors">
-          <MoreVertical size={14} />
-        </button>
+      <td className="px-4 py-3">
+        <div className="flex flex-wrap gap-1">
+          {tags.map(tag => (
+            <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.04] text-[#888] font-mono border border-white/[0.05]">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </td>
+      <td className="px-4 py-3">
+        <div className="flex flex-wrap gap-1">
+          {campaigns.map(camp => (
+            <span key={camp} className="text-[9px] px-1.5 py-0.5 rounded bg-brand/10 text-brand font-bold border border-brand/20">
+              {camp}
+            </span>
+          ))}
+        </div>
       </td>
     </tr>
   );
